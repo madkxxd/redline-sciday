@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,25 +14,22 @@
             height: 400px;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 10px;
-            display: none;
         }
         #chatbot-messages {
-            flex-grow: 1;
+            height: 80%;
             overflow-y: auto;
-            padding: 5px;
             border-bottom: 1px solid #ccc;
+            padding: 5px;
         }
         #chatbot-input {
-            width: calc(100% - 20px);
+            width: 100%;
             padding: 5px;
-            border: none;
-            border-radius: 5px;
-            outline: none;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -50,77 +47,54 @@
 
     <div class="container mt-5">
         <h1 class="text-center">Dashboard</h1>
-        <p class="text-center">Welcome, <span id="userName">[User Name]</span>!</p>
-
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card text-white bg-danger mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Blood Donations</h5>
-                        <p class="card-text" id="totalDonations">150</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card text-white bg-success mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Available Blood Units</h5>
-                        <p class="card-text" id="availableBlood">320</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <p class="text-center">Welcome, <span id="userName">[User Name]</span>!</p>        
     </div>
 
-    <a href="maps.html" class="btn btn-info btn-block mt-3">Locate Blood Banks</a>
-
-    <button onclick="toggleChatbot()" class="btn btn-primary" style="position: fixed; bottom: 20px; right: 20px;">Chat</button>
-    
+    <!-- Chatbot UI -->
     <div id="chatbot-container">
         <div id="chatbot-messages"></div>
-        <input type="text" id="chatbot-input" placeholder="Type a message..." onkeypress="handleChatbotInput(event)">
+        <input type="text" id="chatbot-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
     </div>
 
     <script>
-        function toggleChatbot() {
-            var chatbot = document.getElementById("chatbot-container");
-            chatbot.style.display = chatbot.style.display === "none" ? "block" : "none";
-            if (chatbot.style.display === "block") {
-                addChatbotMessage("Hello! Please choose an option:\n1. Blood donation info\n2. Eligibility criteria\n3. Donation process\n4. Frequency of donations\n5. Check blood availability\n6. Find nearest blood bank\n7. Emergency help\n8. Exit");
-            }
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            appendMessage("Bot: Hello! How can I assist you today?");
+        });
 
-        function handleChatbotInput(event) {
+        function handleKeyPress(event) {
             if (event.key === "Enter") {
-                var inputField = document.getElementById("chatbot-input");
-                var userMessage = inputField.value.trim();
-                if (userMessage === "") return;
-                addChatbotMessage("You: " + userMessage);
-                inputField.value = "";
-                
-                fetch('http://localhost:5000/chatbot', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: userMessage })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    addChatbotMessage("Chatbot: " + data.reply);
-                });
+                sendMessage();
             }
         }
 
-        function addChatbotMessage(message) {
-            var messagesContainer = document.getElementById("chatbot-messages");
-            var messageElement = document.createElement("p");
-            messageElement.textContent = message;
-            messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        function sendMessage() {
+            let inputField = document.getElementById("chatbot-input");
+            let message = inputField.value.trim();
+            if (message === "") return;
+
+            appendMessage("You: " + message);
+            inputField.value = "";
+
+            fetch('/chatbot', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => appendMessage("Bot: " + data.response))
+            .catch(error => appendMessage("Bot: Sorry, there was an error."));
+        }
+
+        function appendMessage(msg) {
+            let messagesDiv = document.getElementById("chatbot-messages");
+            let messageElement = document.createElement("div");
+            messageElement.textContent = msg;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
     </script>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
 
