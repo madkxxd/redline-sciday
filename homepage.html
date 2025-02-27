@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places"></script>
+
+    <title>Home - Blood Donation System</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="homepage.html">Blood Donation System</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="login.html">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="signup.html">Sign Up</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container text-center mt-5">
+        <h1>Welcome to the Blood Donation System</h1>
+        <p>Your contribution can save lives. Join us in making a difference!</p>
+        <a href="signup.html" class="btn btn-primary btn-lg">Join Us Now</a>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Donations Today</h5>
+                        <p class="card-text" id="donationsToday">15</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Donors</h5>
+                        <p class="card-text" id="totalDonors">500</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Urgent Requests</h5>
+                        <p class="card-text" id="urgentRequests">8</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Button -->
+<button id="openChatbot">💬 Chat with RedLine</button>
+
+<!-- Chatbot Container -->
+<div id="chatContainer" style="display:none; position: fixed; bottom: 10px; right: 10px; width: 300px; border: 1px solid #ccc; padding: 10px; background: white;">
+    <h4>RedLine Chatbot</h4>
+    <div id="chatbox" style="height: 200px; overflow-y: scroll; border: 1px solid #ddd; padding: 5px;"></div>
+    <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="closeChat()">❌</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    var socket = io.connect("http://127.0.0.1:5000");
+
+    document.getElementById("openChatbot").addEventListener("click", function() {
+        document.getElementById("chatContainer").style.display = "block";
+    });
+
+    function closeChat() {
+        document.getElementById("chatContainer").style.display = "none";
+    }
+
+    function sendMessage() {
+        var input = document.getElementById("userInput").value;
+        if (!input) return;
+        
+        document.getElementById("chatbox").innerHTML += "<p><b>You:</b> " + input + "</p>";
+        socket.send(input);
+        document.getElementById("userInput").value = "";
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+
+    socket.on("message", function(data) {
+        document.getElementById("chatbox").innerHTML += "<p><b>Bot:</b> " + data + "</p>";
+    });
+</script>   
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
