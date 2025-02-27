@@ -5,37 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <title>Dashboard - Blood Donation System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
-        #chatContainer {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            width: 300px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            background: white;
-            display: none;
-            z-index: 1000;
-        }
+        /* Chatbot Styling */
         #chatbox {
-            height: 200px;
+            max-height: 400px;
             overflow-y: scroll;
             border: 1px solid #ddd;
-            padding: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-top: 20px;
+        }
+        .chat-message {
             margin-bottom: 10px;
         }
-        .user { color: blue; text-align: right; }
-        .bot { color: green; text-align: left; }
+        .chat-message.chatbot {
+            color: #007bff;
+        }
+        .chat-message.user {
+            color: #28a745;
+        }
         #userInput {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 5px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="homepage.html">Dashboard</a>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -47,11 +41,25 @@
         </div>
     </nav>
 
-    <!-- Dashboard Content -->
     <div class="container mt-5">
         <h1 class="text-center">Dashboard</h1>
         <p class="text-center">Welcome, <span id="userName">[User Name]</span>!</p>        
 
+        <!-- Chatbot Section -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Blood Donation Chatbot</h5>
+                        <div id="chatbox"></div>
+                        <input type="text" id="userInput" class="form-control" placeholder="Type 'hi' to start..." />
+                        <button class="btn btn-primary mt-2" id="sendMessage">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard content (as you already have it) -->
         <div class="row mt-4">
             <div class="col-md-6">
                 <div class="card text-white bg-danger mb-3">
@@ -99,61 +107,57 @@
 
     <a href="maps.html" class="btn btn-info btn-block mt-3">Locate Blood Banks</a>
 
-    <!-- Chatbot Button -->
-    <button id="openChatbot" class="btn btn-primary" style="position: fixed; bottom: 80px; right: 10px; z-index: 9999;">
-        💬 Chat with RedLine
-    </button>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <!-- Chatbot Container -->
-    <div id="chatContainer">
-        <h4>RedLine Chatbot</h4>
-        <div id="chatbox"></div>
-        <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
-        <button onclick="sendMessage()" class="btn btn-primary btn-block">Send</button>
-        <button onclick="closeChat()" class="btn btn-danger btn-block">❌ Close</button>
-    </div>
-
-    <!-- Scripts -->
+    <!-- Chatbot JavaScript -->
     <script>
-        var socket = io.connect("http://xyz.ngrok.io"); // Replace with your ngrok URL
-        var chatContainer = document.getElementById("chatContainer");
-        var chatbox = document.getElementById("chatbox");
-        var userInput = document.getElementById("userInput");
+        const chatbotResponses = {
+            "hi": "Hello! Welcome to the RedLine Chatbot! Please choose an option:\n1. Blood Donation Information\n2. Donation Eligibility\n3. Donation Process\n4. Blood Donation Frequency\n5. Check Available Blood Banks\n6. Find Nearest Blood Bank\n7. Emergency Assistance\n8. Exit",
+            "1": "Hello! How can I assist you with blood donation today?",
+            "2": "To donate blood, you must be at least 18 years old, weigh at least 50kg, and be in good health.",
+            "3": "The process involves registration, a health check, donation (which takes about 10 minutes), and a short rest afterward.",
+            "4": "You can donate whole blood every 56 days (for males) and every 84 days (for females).",
+            "5": "Please provide your location, and I'll check real-time availability at the nearest blood bank.",
+            "6": "Please share your location, and I'll find the closest blood bank for you.",
+            "7": "In case of an emergency, please contact the nearest hospital or call emergency services immediately.",
+            "8": "Goodbye! Stay safe and thank you for considering blood donation!"
+        };
 
-        // Open the chatbot
-        document.getElementById("openChatbot").addEventListener("click", function() {
-            chatContainer.style.display = "block";
-        });
+        function sendMessage() {
+            const userInput = document.getElementById("userInput").value;
+            if (userInput.trim() === "") return;
 
-        // Close the chatbot
-        function closeChat() {
-            chatContainer.style.display = "none";
+            // Display user message
+            const userMessage = document.createElement("div");
+            userMessage.classList.add("chat-message", "user");
+            userMessage.innerHTML = `You: ${userInput}`;
+            document.getElementById("chatbox").appendChild(userMessage);
+
+            // Get chatbot response based on user input
+            const botResponse = chatbotResponses[userInput.toLowerCase()] || "Sorry, I didn't understand that. Please choose a valid option.";
+            const chatbotMessage = document.createElement("div");
+            chatbotMessage.classList.add("chat-message", "chatbot");
+            chatbotMessage.innerHTML = `Chatbot: ${botResponse}`;
+            document.getElementById("chatbox").appendChild(chatbotMessage);
+
+            // Scroll to the bottom of the chatbox
+            document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+
+            // Clear input field
+            document.getElementById("userInput").value = "";
         }
 
-        // Send a message when the user presses Enter
-        function handleKeyPress(event) {
+        // Send message on button click
+        document.getElementById("sendMessage").addEventListener("click", sendMessage);
+
+        // Allow sending message on pressing Enter
+        document.getElementById("userInput").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 sendMessage();
             }
-        }
-
-        // Send message to chatbot
-        function sendMessage() {
-            var input = userInput.value;
-            if (!input) return;
-
-            chatbox.innerHTML += "<p class='user'><b>You:</b> " + input + "</p>";
-            socket.send(input);
-            userInput.value = "";
-        }
-
-        // Receive response from the chatbot
-        socket.on("message", function(data) {
-            chatbox.innerHTML += "<p class='bot'><b>Bot:</b> " + data + "</p>";
         });
     </script>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>    
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
+
