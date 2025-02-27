@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Dashboard - Blood Donation System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        #chatContainer {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: white;
+            display: none;
+            z-index: 1000;
+        }
+        #chatbox {
+            height: 200px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .user { color: blue; text-align: right; }
+        .bot { color: green; text-align: left; }
+        #userInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="homepage.html">Dashboard</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="logout.html">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="container mt-5">
+        <h1 class="text-center">Dashboard</h1>
+        <p class="text-center">Welcome, <span id="userName">[User Name]</span>!</p>        
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Blood Donations</h5>
+                        <p class="card-text" id="totalDonations">150</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Available Blood Units</h5>
+                        <p class="card-text" id="availableBlood">320</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Recent Blood Requests</h5>
+                        <ul class="list-group" id="bloodRequests">
+                            <li class="list-group-item">A+ - Needed at City Hospital</li>
+                            <li class="list-group-item">O- - Urgent at Green Care Clinic</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Nearby Blood Banks</h5>
+                        <ul class="list-group" id="bloodBanks">
+                            <li class="list-group-item">Red Cross Blood Center</li>
+                            <li class="list-group-item">LifeCare Blood Bank</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="maps.html" class="btn btn-info btn-block mt-3">Locate Blood Banks</a>
+
+    <!-- Chatbot Button -->
+    <button id="openChatbot" class="btn btn-primary" style="position: fixed; bottom: 80px; right: 10px; z-index: 9999;">
+        💬 Chat with RedLine
+    </button>
+
+    <!-- Chatbot Container -->
+    <div id="chatContainer">
+        <h4>RedLine Chatbot</h4>
+        <div id="chatbox"></div>
+        <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()" class="btn btn-primary btn-block">Send</button>
+        <button onclick="closeChat()" class="btn btn-danger btn-block">❌ Close</button>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        var socket = io.connect("http://xyz.ngrok.io"); // Replace with your ngrok URL
+        var chatContainer = document.getElementById("chatContainer");
+        var chatbox = document.getElementById("chatbox");
+        var userInput = document.getElementById("userInput");
+
+        // Open the chatbot
+        document.getElementById("openChatbot").addEventListener("click", function() {
+            chatContainer.style.display = "block";
+        });
+
+        // Close the chatbot
+        function closeChat() {
+            chatContainer.style.display = "none";
+        }
+
+        // Send a message when the user presses Enter
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        // Send message to chatbot
+        function sendMessage() {
+            var input = userInput.value;
+            if (!input) return;
+
+            chatbox.innerHTML += "<p class='user'><b>You:</b> " + input + "</p>";
+            socket.send(input);
+            userInput.value = "";
+        }
+
+        // Receive response from the chatbot
+        socket.on("message", function(data) {
+            chatbox.innerHTML += "<p class='bot'><b>Bot:</b> " + data + "</p>";
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>    
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
